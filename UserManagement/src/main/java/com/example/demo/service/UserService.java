@@ -79,32 +79,56 @@ public class UserService {
     @Transactional("transactionManager")
     public User updateUserProfile(Long userId, UserUpdateDto dto) {
         User user = userRepository.findById(userId)
-                     .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setName(dto.getName());
-        user.setGender(dto.getGender());
-        user.setPhone(dto.getPhone());
+               .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Update basic user information only if the DTO field is not null
+        if (dto.getName() != null) {
+            user.setName(dto.getName());
+        }
+        if (dto.getGender() != null) {
+            user.setGender(dto.getGender());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        // Persist changes to the common user fields.
         User savedUser = userRepository.save(user);
-
+        
+        // Role-specific update for DOCTOR
         if (user.getRole() == Role.DOCTOR) {
             Optional<Doctor> opDoc = doctorRepository.findByUser(user);
             if (opDoc.isPresent()) {
                 Doctor doctor = opDoc.get();
-                doctor.setSpecialization(dto.getSpecialization());
-                doctor.setQualification(dto.getQualification());
-                doctor.setRoomNumber(dto.getRoomNumber());
+                if (dto.getSpecialization() != null) {
+                    doctor.setSpecialization(dto.getSpecialization());
+                }
+                if (dto.getQualification() != null) {
+                    doctor.setQualification(dto.getQualification());
+                }
+                if (dto.getRoomNumber() != null) {
+                    doctor.setRoomNumber(dto.getRoomNumber());
+                }
                 doctorRepository.save(doctor);
             }
-        } else if (user.getRole() == Role.PATIENT) {
+        } 
+        // Role-specific update for PATIENT
+        else if (user.getRole() == Role.PATIENT) {
             Optional<Patient> opPat = patientRepository.findByUser(user);
             if (opPat.isPresent()) {
                 Patient patient = opPat.get();
-                patient.setDisease(dto.getDisease());
-                patient.setPlace(dto.getPlace());
+                if (dto.getDisease() != null) {
+                    patient.setDisease(dto.getDisease());
+                }
+                if (dto.getPlace() != null) {
+                    patient.setPlace(dto.getPlace());
+                }
                 patientRepository.save(patient);
             }
         }
+        
         return savedUser;
     }
+
     
 
 	public User createUser(User user) {

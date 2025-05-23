@@ -45,26 +45,26 @@ public class DatabaseConfig {
     }
 
  // --- Secondary: Healthcare Database for Doctor & Patient records ---
- @Bean(name = "healthcareDataSource")
- @ConfigurationProperties(prefix = "spring.datasource.healthcare")
- public DataSource healthcareDataSource() {
-     return DataSourceBuilder.create().build();
- }
-
- @Bean(name = "healthcareEntityManagerFactory")
- public LocalContainerEntityManagerFactoryBean healthcareEntityManagerFactory() {
-     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-     em.setDataSource(healthcareDataSource());
-     // This package contains the Doctor and Patient entities
-     em.setPackagesToScan("com.healthcare.entity");
-     em.setPersistenceUnitName("healthcarePU");
-     em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-     return em;
- }
-
- @Bean(name = "healthcareTransactionManager")
- public PlatformTransactionManager healthcareTransactionManager(
-         @Qualifier("healthcareEntityManagerFactory") LocalContainerEntityManagerFactoryBean healthcareEntityManagerFactory) {
-     return new JpaTransactionManager(healthcareEntityManagerFactory.getObject());
- }
+// @Bean(name = "healthcareDataSource")
+// @ConfigurationProperties(prefix = "spring.datasource.healthcare")
+// public DataSource healthcareDataSource() {
+//     return DataSourceBuilder.create().build();
+// }
+//
+// @Bean(name = "healthcareEntityManagerFactory")
+// public LocalContainerEntityManagerFactoryBean healthcareEntityManagerFactory() {
+//     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+//     em.setDataSource(healthcareDataSource());
+//     // This package contains the Doctor and Patient entities
+//     em.setPackagesToScan("com.healthcare.entity");
+//     em.setPersistenceUnitName("healthcarePU");
+//     em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+//     return em;
+// }
+//
+// @Bean(name = "healthcareTransactionManager")
+// public PlatformTransactionManager healthcareTransactionManager(
+//         @Qualifier("healthcareEntityManagerFactory") LocalContainerEntityManagerFactoryBean healthcareEntityManagerFactory) {
+//     return new JpaTransactionManager(healthcareEntityManagerFactory.getObject());
+// }
 }

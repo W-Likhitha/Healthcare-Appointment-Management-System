@@ -18,17 +18,17 @@ public class ProfileController {
     private UserService userService;
 
     // POST: Create new profile
-    @PostMapping("/kiki")
-    public ResponseEntity<?> createProfile(@RequestBody User user) {
-        try {
-            // Assuming there is a service method to save a new user profile.
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body("Creation failed: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/kiki")
+//    public ResponseEntity<?> createProfile(@RequestBody User user) {
+//        try {
+//            // Assuming there is a service method to save a new user profile.
+//            User createdUser = userService.createUser(user);
+//            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                                 .body("Creation failed: " + e.getMessage());
+//        }
+//    }
 
     // GET profile, e.g., GET /api/profile/1
     @GetMapping("/{userId}")
