@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.UserUpdateDto;
 import com.example.demo.entity.User;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.UserService;
 
 @RestController
@@ -16,6 +19,12 @@ public class ProfileController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private DoctorRepository doctorRepository;
+    
+    @Autowired
+    private PatientRepository patientRepository;
 
     // POST: Create new profile
 //    @PostMapping("/kiki")
@@ -29,6 +38,16 @@ public class ProfileController {
 //                                 .body("Creation failed: " + e.getMessage());
 //        }
 //    }
+    
+    @GetMapping("/doctorsList")
+    public ResponseEntity<List<Doctor>> getAllDoctors() {
+        return ResponseEntity.ok(doctorRepository.findAll());
+    }
+    
+    @GetMapping("/patientsList")
+    public ResponseEntity<List<Patient>> getAllPatients() {
+        return ResponseEntity.ok(patientRepository.findAll());
+    }
 
     // GET profile, e.g., GET /api/profile/1
     @GetMapping("/{userId}")
