@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.appschl.entity.Appointment;
+import com.appschl.entity.AppointmentStatus;
 import com.example.demo.entity.User;
 
 @Repository
@@ -23,4 +24,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 	Appointment findFirstByDoctorAndPatientAndAppointmentDateAndAppointmentTime(User doctor, User patient,
 			LocalDate date, LocalTime startTime);
+	
+	List<Appointment> findByAppointmentDateAndStatus(LocalDate appointmentDate, AppointmentStatus status);
 }

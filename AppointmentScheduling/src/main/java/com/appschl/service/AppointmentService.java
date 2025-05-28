@@ -73,6 +73,9 @@ public class AppointmentService {
 //booking methods
     @Transactional
     public BookingResult bookOrWaitAppointment(Long patientId, Long doctorId, LocalDateTime appointmentDateTime, boolean followUp) {
+    	if (appointmentDateTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Cannot book an appointment in the past.");
+        }
         BookingResult result = new BookingResult();
         
         User patient = userRepository.findById(patientId)
@@ -90,13 +93,14 @@ public class AppointmentService {
         LocalDate date = appointmentDateTime.toLocalDate();
         LocalTime startTime = appointmentDateTime.toLocalTime();
 
-        // ----- Check for duplicate appointments -----
-        // Verify if an appointment is already booked with the same doctor, patient, date, and time.
+        // ----- Duplicate Check -----
+     // Check if there is already a booked appointment with the same doctor, patient, date, and time.
         Appointment duplicateAppointment = appointmentRepository
                 .findFirstByDoctorAndPatientAndAppointmentDateAndAppointmentTime(doctor, patient, date, startTime);
         if (duplicateAppointment != null) {
             throw new RuntimeException("Duplicate booking: an appointment for this slot already exists.");
         }
+
         // Check if the patient is already on the waiting list for the same doctor and slot.
         List<WaitingAppointment> existingWaiting = waitingAppointmentRepository.findByDoctorAndPatient(doctor, patient);
         if (existingWaiting != null && !existingWaiting.isEmpty()) {
@@ -271,6 +275,42 @@ public class AppointmentService {
         response.setDate(date);
         response.setAvailableSlots(getAvailableTimeSlots(doctorId, date));
         return response;
+    }
+    
+    @Transactional
+    public void cancelOverdueAppointments() {
+        // Get today's date
+        LocalDate today = LocalDate.now();
+        // Current system time (you may adjust this if you are using a specific timezone)
+        LocalTime currentTime = LocalTime.now();
+
+        // Retrieve all appointments for today that are in BOOKED status.
+        List<Appointment> appointments = appointmentRepository.findByAppointmentDateAndStatus(today, AppointmentStatus.BOOKED);
+
+        // Process each appointment
+        for (Appointment appointment : appointments) {
+            // Only cancel if the appointment time is before the current time.
+            if (appointment.getAppointmentTime().isBefore(currentTime)) {
+                // Mark the appointment as CANCELLED
+                appointment.setStatus(AppointmentStatus.CANCELLED);
+                appointmentRepository.save(appointment);
+
+                // Build the appointment date-time and define a ±15-minute window.
+                LocalDateTime appointmentDateTime = appointment.getAppointmentDate().atTime(appointment.getAppointmentTime());
+                LocalDateTime startWindow = appointmentDateTime.minusMinutes(15);
+                LocalDateTime endWindow = appointmentDateTime.plusMinutes(15);
+
+                // Find waiting appointments for the same doctor in the defined time window.
+                List<WaitingAppointment> waitingList = waitingAppointmentRepository
+                        .findByDoctorAndPreferredTimeBetween(appointment.getDoctor(), startWindow, endWindow);
+
+                // Delete the waiting appointments if found.
+                if (waitingList != null && !waitingList.isEmpty()) {
+                    waitingAppointmentRepository.deleteAll(waitingList);
+                    waitingAppointmentRepository.flush();
+                }
+            }
+        }
     }
     
 }
